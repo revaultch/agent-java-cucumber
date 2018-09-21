@@ -1,4 +1,4 @@
-# Cucumber2 Agent for ReportPortal
+# Cucumber3 Agent for ReportPortal
  [ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-cucumber2/images/download.svg) ](https://github.com/reportportal/agent-java-cucumber2/_latestVersion)
  
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)

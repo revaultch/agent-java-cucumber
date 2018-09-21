@@ -4,11 +4,15 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: "maven"
 apply from: 'release-lib.gradle'
 apply from: 'quality.gradle'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
+
+group = "com.epam.reportportal"
+version = "4.0.0"
 
 repositories {
     jcenter()
@@ -26,7 +30,7 @@ dependencies {
     }
 
 
-    compile group: 'io.cucumber', name: 'cucumber-java', version: '2.4.0'
+    compile group: 'io.cucumber', name: 'cucumber-java', version: '3.0.0'
 }
 
 task wrapper(type: Wrapper) {
