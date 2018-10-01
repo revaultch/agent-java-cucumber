@@ -1,4 +1,4 @@
-# Cucumber3 Agent for ReportPortal
+# Cucumber4 Agent for ReportPortal
  [ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-cucumber2/images/download.svg) ](https://github.com/reportportal/agent-java-cucumber2/_latestVersion)
  
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
@@ -29,7 +29,7 @@ Add to POM.xml
 
 <dependency>
   <groupId>com.epam.reportportal</groupId>
-  <artifactId>agent-java-cucumber2</artifactId>
+  <artifactId>agent-java-cucumber4</artifactId>
   <version>4.0.0</version>
 </dependency>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

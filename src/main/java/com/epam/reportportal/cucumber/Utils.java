@@ -27,25 +27,17 @@ import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ.File;
+import cucumber.api.PickleStepTestStep;
 import cucumber.api.TestStep;
 import gherkin.ast.Tag;
-import gherkin.pickles.Argument;
-import gherkin.pickles.PickleCell;
-import gherkin.pickles.PickleRow;
-import gherkin.pickles.PickleString;
-import gherkin.pickles.PickleTable;
-import gherkin.pickles.PickleTag;
+import gherkin.pickles.*;
 import io.reactivex.Maybe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rp.com.google.common.base.Function;
 import rp.com.google.common.collect.ImmutableMap;
 
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
@@ -188,8 +180,8 @@ public class Utils {
         String dockString = "";
         StringBuilder marg = new StringBuilder();
 
-        if (!step.getStepArgument().isEmpty()) {
-            Argument argument = step.getStepArgument().get(0);
+        if (!pickledStepArgument(step).isEmpty()) {
+            Argument argument = pickledStepArgument(step).get(0);
             if (argument instanceof PickleString) {
                 dockString = ((PickleString) argument).getContent();
             } else if (argument instanceof PickleTable) {
@@ -211,5 +203,26 @@ public class Utils {
             marg.append(DOCSTRING_DECORATOR).append(dockString).append(DOCSTRING_DECORATOR);
         }
         return marg.toString();
+    }
+
+    public static String pickledStepText(TestStep step) {
+        if (step instanceof PickleStepTestStep) {
+            return ((PickleStepTestStep)step).getStepText();
+        }
+        return "";
+    }
+
+    public static List<Argument> pickledStepArgument(TestStep step) {
+        if (step instanceof PickleStepTestStep) {
+            return ((PickleStepTestStep)step).getStepArgument();
+        }
+        return Collections.emptyList();
+    }
+
+    public static int pickledStepLineOrDefault(TestStep step, int defaultValue) {
+        if (step instanceof PickleStepTestStep) {
+            return ((PickleStepTestStep)step).getStepLine();
+        }
+        return defaultValue;
     }
 }

@@ -21,6 +21,7 @@
 package com.epam.reportportal.cucumber;
 
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import cucumber.api.PickleStepTestStep;
 import cucumber.api.Result;
 import cucumber.api.TestStep;
 import gherkin.ast.Step;
@@ -64,7 +65,8 @@ public class ScenarioReporter extends AbstractReporter {
     @Override
     protected void beforeStep(TestStep testStep) {
         Step step = currentScenarioContext.getStep(testStep);
-        String decoratedStepName = decorateMessage(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), testStep.getStepText(), " "));
+
+        String decoratedStepName = decorateMessage(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
         String multilineArg = Utils.buildMultilineArgument(testStep);
         Utils.sendLog(decoratedStepName + multilineArg, "INFO", null);
     }

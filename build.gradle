@@ -30,7 +30,7 @@ dependencies {
     }
 
 
-    compile group: 'io.cucumber', name: 'cucumber-java', version: '3.0.0'
+    compile group: 'io.cucumber', name: 'cucumber-java', version: '4.0.0'
 }
 
 task wrapper(type: Wrapper) {

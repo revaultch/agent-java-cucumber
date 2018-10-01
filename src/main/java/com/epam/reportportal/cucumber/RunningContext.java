@@ -1,5 +1,6 @@
 package com.epam.reportportal.cucumber;
 
+import cucumber.api.PickleStepTestStep;
 import cucumber.api.TestCase;
 import cucumber.api.TestStep;
 import cucumber.api.event.TestSourceRead;
@@ -15,6 +16,7 @@ import gherkin.ast.ScenarioDefinition;
 import gherkin.ast.ScenarioOutline;
 import gherkin.ast.Step;
 import gherkin.ast.TableRow;
+import gherkin.pickles.PickleStep;
 import gherkin.pickles.PickleTag;
 import io.reactivex.Maybe;
 
@@ -231,7 +233,7 @@ public class RunningContext {
         }
 
         Step getStep(TestStep testStep) {
-            Step step = scenarioLocationMap.get(testStep.getStepLine());
+            Step step = scenarioLocationMap.get(Utils.pickledStepLineOrDefault(testStep, -1));
             if (step != null) {
                 return step;
             }

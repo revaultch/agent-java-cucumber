@@ -22,6 +22,7 @@ package com.epam.reportportal.cucumber;
 
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import cucumber.api.PickleStepTestStep;
 import cucumber.api.Result;
 import cucumber.api.TestStep;
 import gherkin.ast.Step;
@@ -70,7 +71,7 @@ public class StepReporter extends AbstractReporter {
     protected void beforeStep(TestStep testStep) {
         Step step = currentScenarioContext.getStep(testStep);
         StartTestItemRQ rq = new StartTestItemRQ();
-        rq.setName(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), testStep.getStepText(), " "));
+        rq.setName(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
         rq.setDescription(Utils.buildMultilineArgument(testStep));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("STEP");
