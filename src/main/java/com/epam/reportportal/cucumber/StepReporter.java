@@ -69,13 +69,13 @@ public class StepReporter extends AbstractReporter {
 
     @Override
     protected void beforeStep(TestStep testStep) {
-        Step step = currentScenarioContext.getStep(testStep);
+        Step step = currentScenarioContext().getStep(testStep);
         StartTestItemRQ rq = new StartTestItemRQ();
-        rq.setName(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
+        rq.setName(Utils.buildNodeName(currentScenarioContext().getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
         rq.setDescription(Utils.buildMultilineArgument(testStep));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("STEP");
-        currentStepId = RP.get().startTestItem(currentScenarioContext.getId(), rq);
+        currentStepId = RP.get().startTestItem(currentScenarioContext().getId(), rq);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class StepReporter extends AbstractReporter {
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType(isBefore ? "BEFORE_TEST" : "AFTER_TEST");
 
-        hookStepId = RP.get().startTestItem(currentScenarioContext.getId(), rq);
+        hookStepId = RP.get().startTestItem(currentScenarioContext().getId(), rq);
         hookStatus = Statuses.PASSED;
     }
 

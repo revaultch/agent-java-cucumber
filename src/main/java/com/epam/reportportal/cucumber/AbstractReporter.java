@@ -54,10 +54,10 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
     protected static final String COLON_INFIX = ": ";
 
     /* feature context */
-    protected RunningContext.FeatureContext currentFeatureContext;
+    private final ThreadLocal<RunningContext.FeatureContext> currentFeatureContext_ = new ThreadLocal<RunningContext.FeatureContext>();
 
     /* scenario context */
-    protected RunningContext.ScenarioContext currentScenarioContext;
+    private final ThreadLocal<RunningContext.ScenarioContext> currentScenarioContext_ = new ThreadLocal<RunningContext.ScenarioContext>();
 
     protected Supplier<Launch> RP;
 
@@ -117,8 +117,8 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
      * Finish Cucumber feature
      */
     protected void afterFeature() {
-        Utils.finishTestItem(RP.get(), currentFeatureContext.getFeatureId());
-        currentFeatureContext = null;
+        Utils.finishTestItem(RP.get(), currentFeatureContext().getFeatureId());
+        currentFeatureContext(null);
     }
 
     /**
@@ -126,13 +126,13 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
      */
     protected void beforeScenario() {
         Maybe<String> id = Utils.startNonLeafNode(RP.get(),
-                currentFeatureContext.getFeatureId(),
-                Utils.buildNodeName(currentScenarioContext.getKeyword(), AbstractReporter.COLON_INFIX, currentScenarioContext.getName(), currentScenarioContext.getOutlineIteration()),
-                currentFeatureContext.getUri() + ":" + currentScenarioContext.getLine(),
-                currentScenarioContext.getTags(),
+                currentFeatureContext().getFeatureId(),
+                Utils.buildNodeName(currentScenarioContext().getKeyword(), AbstractReporter.COLON_INFIX, currentScenarioContext().getName(), currentScenarioContext().getOutlineIteration()),
+                currentFeatureContext().getUri() + ":" + currentScenarioContext().getLine(),
+                currentScenarioContext().getTags(),
                 getScenarioTestItemType()
         );
-        currentScenarioContext.setId(id);
+        currentScenarioContext().setId(id);
     }
 
     /**
@@ -140,8 +140,8 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
      * @param event TestCaseFinished event.
      */
     protected void afterScenario(TestCaseFinished event) {
-        Utils.finishTestItem(RP.get(), currentScenarioContext.getId(), event.result.getStatus().toString());
-        currentScenarioContext = null;
+        Utils.finishTestItem(RP.get(), currentScenarioContext().getId(), event.result.getStatus().toString());
+        currentScenarioContext(null);
     }
 
     /**
@@ -150,15 +150,15 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
     protected void startFeature() {
         StartTestItemRQ rq = new StartTestItemRQ();
         Maybe<String> root = getRootItemId();
-        rq.setDescription(currentFeatureContext.getUri());
-        rq.setName(Utils.buildNodeName(currentFeatureContext.getFeature().getKeyword(), AbstractReporter.COLON_INFIX, currentFeatureContext.getFeature().getName(), null));
-        rq.setTags(currentFeatureContext.getTags());
+        rq.setDescription(currentFeatureContext().getUri());
+        rq.setName(Utils.buildNodeName(currentFeatureContext().getFeature().getKeyword(), AbstractReporter.COLON_INFIX, currentFeatureContext().getFeature().getName(), null));
+        rq.setTags(currentFeatureContext().getTags());
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType(getFeatureTestItemType());
         if (null == root) {
-            currentFeatureContext.setFeatureId(RP.get().startTestItem(rq));
+            currentFeatureContext().setFeatureId(RP.get().startTestItem(rq));
         } else {
-            currentFeatureContext.setFeatureId(RP.get().startTestItem(root, rq));
+            currentFeatureContext().setFeatureId(RP.get().startTestItem(root, rq));
         }
     }
 
@@ -346,7 +346,7 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
         return new EventHandler<TestRunFinished>() {
             @Override
             public void receive(TestRunFinished event) {
-                if (currentFeatureContext != null) {
+                if (currentFeatureContext() != null) {
                     handleEndOfFeature();
                 }
                 afterLaunch();
@@ -373,7 +373,7 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
     }
 
     private void handleStartOfFeature(TestCase testCase) {
-        currentFeatureContext = new RunningContext.FeatureContext().processTestSourceReadEvent(testCase);
+        currentFeatureContext(new RunningContext.FeatureContext().processTestSourceReadEvent(testCase));
         beforeFeature();
     }
 
@@ -383,32 +383,34 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
 
     private void handleStartOfTestCase(TestCaseStarted event) {
         TestCase testCase = event.testCase;
-        if (currentFeatureContext != null && !testCase.getUri().equals(currentFeatureContext.getUri())) {
+        if (currentFeatureContext() != null && !testCase.getUri().equals(currentFeatureContext().getUri())) {
             handleEndOfFeature();
         }
-        if (currentFeatureContext == null) {
+        if (currentFeatureContext() == null) {
             handleStartOfFeature(testCase);
         }
-        if (!currentFeatureContext.getUri().equals(testCase.getUri())) {
+        if (!currentFeatureContext().getUri().equals(testCase.getUri())) {
             throw new IllegalStateException("Scenario URI does not match Feature URI.");
         }
-        if (currentScenarioContext == null) {
-            currentScenarioContext = currentFeatureContext.getScenarioContext(testCase);
+        if (currentScenarioContext() == null) {
+            currentScenarioContext(currentFeatureContext().getScenarioContext(testCase));
         }
         beforeScenario();
     }
+
 
     private void handleTestStepStarted(TestStepStarted event) {
         TestStep testStep = event.testStep;
         if (testStep instanceof HookTestStep) {
             beforeHooks(isBefore(testStep));
         } else {
-            if (currentScenarioContext.withBackground()) {
-                currentScenarioContext.nextBackgroundStep();
+            if (currentScenarioContext().withBackground()) {
+                currentScenarioContext().nextBackgroundStep();
             }
             beforeStep(testStep);
         }
     }
+
 
     private void handleTestStepFinished(TestStepFinished event) {
         if (event.testStep instanceof HookTestStep) {
@@ -417,6 +419,22 @@ public abstract class AbstractReporter implements ConcurrentEventListener {
         } else {
             afterStep(event.result);
         }
+    }
+
+    private void currentFeatureContext(RunningContext.FeatureContext featureContext) {
+        currentFeatureContext_.set(featureContext);
+    }
+
+    protected final RunningContext.ScenarioContext currentScenarioContext() {
+        return currentScenarioContext_.get();
+    }
+
+    private void currentScenarioContext(RunningContext.ScenarioContext scenarioContext) {
+        currentScenarioContext_.set(scenarioContext);
+    }
+
+    protected final RunningContext.FeatureContext currentFeatureContext() {
+        return currentFeatureContext_.get();
     }
 
 }

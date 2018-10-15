@@ -64,9 +64,9 @@ public class ScenarioReporter extends AbstractReporter {
 
     @Override
     protected void beforeStep(TestStep testStep) {
-        Step step = currentScenarioContext.getStep(testStep);
+        Step step = currentScenarioContext().getStep(testStep);
 
-        String decoratedStepName = decorateMessage(Utils.buildNodeName(currentScenarioContext.getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
+        String decoratedStepName = decorateMessage(Utils.buildNodeName(currentScenarioContext().getStepPrefix(), step.getKeyword(), Utils.pickledStepText(testStep), " "));
         String multilineArg = Utils.buildMultilineArgument(testStep);
         Utils.sendLog(decoratedStepName + multilineArg, "INFO", null);
     }
